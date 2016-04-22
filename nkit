@@ -1,420 +1,85 @@
 #!/bin/bash
 
-# Custom toolkit for black.dragon74’s personal use
+# This is an attempt to recode the N(k)it™ framework for OSX for a much cleaner and easier interpretation.
 
-# All code is copyrighted property of black.dragon74
+# This version will be published as ver 2.0 of the N(k)it™ framework
 
-# First version ver 1.0 created on Tue Apr 19 17:44:21 IST 2016
+# Let's start with declaring the local variables first.
 
-# Ver 1.0 completed on Thu Apr 21 21:32:31 IST 2016
+home=$(echo $HOME) # Fetch the location of the home directory.
+desktop=home/Desktop # Define the location of the desktop. ~/Desktop would have been an easier approach but was not used.
+date=$(date "+%d-%m-%y") # This is the date in the Indian Style as DD-MM-YY for international standard use date=$(date "+%m-%d-%y").
+time=$(date "+%T") # Get the time in HH:MM:SS format.
+efilocation=/dev/disk0s1 # This is generally the location of EFI. Change it in case.
+backupfolder=$desktop/Backup_On_$date # The location of the backup folder, date is added for multiple backups.
+restorefolder=$desktop/Backup_On_$timestamp # The folder from which the data will be restored. $timestamp will be read by the restoration function.
+efifolder=/Volumes/EFI/EFI/ # We will be using the diskutil approach to mount the fs so no more temp dir creation. Do not use /EFI it is more of a dummy folder for UEFI based install. Use that only on Clover Legacy.
+clover=$efifolder/CLOVER # This is the location where the clover bootloader is generally installed. Change it if necessary.
+dsdt=$clover/ACPI/patched/ # The location of all DSDTs and SSDTs.
+config=$clover/*.plist # The location of all config files. Some users have some plists backup so we will count them in.
+drivers=$clover/drivers64UEFI/ # The location of all clover drivers.
+injectedkexts=$clover/kexts/ # The location of all (Ke)rnel E(xt)ensions.
 
-# Let’s start the poem
+# Location of folders on the backup directory. These are the folders where the data will be backed up.
 
-  clear
+dsdtbackup=$backupfolder/DSDT/
+configbackup=$backupfolder/Configs/
+driversbackup=$backupfolder/Clover_Drivers/
+injectedkextsbackup=$backupfolder/Injected_Kexts/
+slekextsbackup=$backupfolder/SLE_Kexts/
 
-# Program vars declarations.
+# As the restoration folder will differ. We will declare the same variables for restoration again with some difference.
 
-home=$(echo $HOME)
-date=$(date "+%m-%d-%y")
-time=$(date "+%T")
-desktop=$home/Desktop
-backupfolder=$desktop/Backnk_On_$date/
-kexts=/EFIM/EFI/CLOVER/kexts/*
-kextsfolder=$backupfolder/Injected_Kexts
-drivers=/EFIM/EFI/CLOVER/drivers64UEFI/*
-driversfolder=$backupfolder/Drivers
-configs=/EFIM/EFI/CLOVER/*.plist
-configsfolder=$backupfolder/Configs
-dsdts=/EFIM/EFI/CLOVER/ACPI/patched/*
-dsdtsfolder=$backupfolder/ACPI
-appfolder=$backupfolder/Applications
-slekexts=~/temp.txt
-touch $slekexts
-slekextsfolder=$backupfolder/SLE_Kexts
-listfile=$desktop/list.txt
-newfile=$desktop/list2.txt
-clone=$desktop/clone.txt
-author="black.dragon74" # Please do not change it unless and until you have the permission to do so.
-user=$(echo $whoami)
+dsdtrestore=$restorefolder/DSDT/
+configrestore=$restorefolder/Configs/
+driversrestore=$restorefolder/Clover_Drivers/
+injectedkextsrestore=$restorefolder/Injected_Kexts/
+slekextsrestore=$restorefolder/SLE_Kexts/
 
-# Program Functions Declarations
+# We are done with the variables. If some fuction requires some variables they will be declared within the function's scope.
 
-function _PRINTHEADER()
+# Now we will declare the functions as i prefer writing a piece of code once instead of writing the same code over and over again.
+
+function mountEFI()
 {
-echo N\(k\)it™ ver 1.0 by $author is running on $(sw_vers -productName) $(sw_vers -productVersion)
+	# Check if the volume is aready mounted.
+	if [ -f /Volumes/EFI ];
+		then 
+		# Skip remount
+		echo -e "Volume already mounted. Skipping remount."
+	else
+		# Mount the partition
+		echo -e "Mounting EFI Partition."
+		diskutil mount $efilocation
+	fi 
 }
 
-function _PRINTHELP()
+function unmountEFI()
 {
-echo N\(k\)it™ ver 1.0 by $author is running on $(sw_vers -productName) $(sw_vers -productVersion)
-echo usage\: nkit [help]\|[-h] Prints help\(this\) information.
-echo \ \ \ \ \ \ \ nkit [backup]\|[-b] Generates a backup of important hackintosh files.
-echo \ \ \ \ \ \ \ nkit [restore]\|[-r] Restores the generated backup.
-echo \ \ \ \ \ \ \ nkit [efim]\|[-em] Mounts the EFI partition.
-echo \ \ \ \ \ \ \ nkit [efiu]\|[-eu] Unmounts the EFI Partition.
-echo \ \ \ \ \ \ \ nkit [prepareaft]\|[-aft] Revives Android File Transfer™ from death\-bed.
-echo \ \ \ \ \ \ \ nkit [unloadaft]\|[-uaft] Puts Android File Transfer™ to death\-bed.
-}
-
-function _EFIMOUNT()
-{
-sleep 2 # Just in case
-if [ -e /EFIM ];
-then
-sudo rmdir /EFIM
-sudo mkdir /EFIM
-sudo mount_msdos /dev/disk0s1 /EFIM
-echo Mounted Required Partitions…
-else
-sudo mkdir /EFIM
-sudo mount_msdos /dev/disk0s1 /EFIM
-echo Mounted Required Partitions…
-fi
-}
-
-function _EFIUMOUNT()
-{
-sleep 2 # Just in case
-sudo diskutil unmount /dev/disk0s1
-sudo rmdir /EFIM
-}
-
-function _GENERATEBACKUP()
-{
-
-# Tell user what will be backed up.
-echo Items that will be backed up include :- && sleep 0.5
-echo EFI Kexts && sleep 0.5
-echo 64 bit UEFI Drivers && sleep 0.5
-echo Clover configs \(All of them\) && sleep 0.5
-echo Patched DSDTs or SSDTs && sleep 0.5
-echo List of Applications stored in a file named list.txt on  your desktop. && sleep 0.5
-echo A few of the SLE Kexts && sleep 0.5 && echo
-
-# Some specific functions first.
-
-function _WRITEKEXTLIST()
-{
-cat > $slekexts <<EOF
-CodecComm
-NullCPU
-ACPIBacklight
-ACPIBattery
-ACPIDebug
-AHCIPortInjector
-AppleNForceATA
-ApplePCIIDE
-ATAPortInjector
-FakePCIID_
-FakePCIID.k
-FakeSMC
-GenericU
-IntelBack
-IOAHCIBlock
-RealtekRTL
-SuperVIAATA
-VoodooP
-VoodooH
-EOF
-}
-
-_WRITEKEXTLIST
-
-function _ECHOKEXTLISTS()
-{
-for f in $(cat $slekexts); do
-	if [ -e /System/Library/Extensions/$f* ];
-	then
-	echo -e /System/Library/Extensions/$f* && sleep 0.5
+	# Check if the volume is mounted. Then only attemp unmount.
+	if [ -f /Volumes/EFI ];
+		then
+		# Unmount the volume
+		diskutil unmount $efilocation
+	else
+		# Skip
+		echo -e "Volume already unmounted."
 	fi
-done
 }
 
-function _CREATEMPFILE()
+function printHeader()
 {
-	if [ -e $newfile ];
-	then
-	rm -f $newfile
-	fi
-        sed 's/^/\/Applications\//g' $clone >> $newfile
+	echo N\(k\)it™ ver 1.0 by $author is running on $(sw_vers -productName) $(sw_vers -productVersion)
 }
 
-function _CREATECLONE()
+function printHelp()
 {
-if [ -e $clone ];
-then
-rm -f $clone
-fi
-for f in $(cat $listfile); do
-	echo $f >> $clone
-done
+	echo N\(k\)it™ ver 1.0 by $author is running on $(sw_vers -productName) $(sw_vers -productVersion)
+	echo usage\: nkit [help]\|[-h] Prints help\(this\) information.
+	echo \ \ \ \ \ \ \ nkit [backup]\|[-b] Generates a backup of important hackintosh files.
+	echo \ \ \ \ \ \ \ nkit [restore]\|[-r] Restores the generated backup.
+	echo \ \ \ \ \ \ \ nkit [efim]\|[-em] Mounts the EFI partition.
+	echo \ \ \ \ \ \ \ nkit [efiu]\|[-eu] Unmounts the EFI Partition.
+	echo \ \ \ \ \ \ \ nkit [prepareaft]\|[-aft] Revives Android File Transfer™ from death\-bed.
+	echo \ \ \ \ \ \ \ nkit [unloadaft]\|[-uaft] Puts Android File Transfer™ to death\-bed.
 }
-
-function _EMPTYJUNK()
-{
-rm -f $newfile
-rm -f $clone
-rm -f $listfile
-rm -f $slekexts
-}
-
-function _CREATEFOLDERS()
-{
-mkdir -p $kextsfolder
-mkdir -p $driversfolder
-mkdir -p $configsfolder
-mkdir -p $dsdtsfolder
-mkdir -p $appfolder
-mkdir -p $slekextsfolder
-}
-
-function _COPYDATA()
-{
-cp -rf $kexts $kextsfolder && echo Copied Kexts.
-cp -rf $drivers $driversfolder && echo Copied UEFI 64-bit Drivers.
-cp -rf $configs $configsfolder && echo Copied Config Plists.
-cp -rf $dsdts $dsdtsfolder && echo Copied DSDTs and SSDTs
-for f in $(cat $newfile) ; do
-	if [ -e $f* ];
-	then
-	cp -rf $f* $appfolder && echo Copied $f* && sleep 0.5
-	fi
-done
-
-for n in $(cat $slekexts) ; do
-	if [ -e /System/Library/Extensions/$n* ];
-	then
-	cp -rf /System/Library/Extensions/$n* $slekextsfolder && echo Copied /System/Library/Extensions/$n* && sleep 0.5
-	fi
-done
-
-
-}
-
-function _ADDSIGN(){
-touch $backupfolder/signature.txt
-echo Script Coded By Black.dragon74 >> $backupfolder/signature.txt
-echo Backed Up This Data On $date at $time IST>> $backupfolder/signature.txt
-echo X >> $backupfolder/signature.txt
-}
-
-function _INITIATEBACKUP()
-{
-rm -rf $backupfolder
-_EFIMOUNT
-_CREATEFOLDERS
-_CREATECLONE
-_CREATEMPFILE
-echo Copying Data…
-_COPYDATA 2>/dev/null
-_EMPTYJUNK
-}
-
-# Program Intro and Description.
-
-echo Starting Backup Protrocol…
-rm -rf $folder
-if [ -e $listfile ];
-then
-rm -f $listfile
-fi
-touch $listfile
-echo Clover >> $listfile
-echo IO >> $listfile
-echo iExplorer >> $listfile
-echo Kext >> $listfile
-echo MaciASL >> $listfile
-echo DPCI >> $listfile
-echo Voo >> $listfile
-echo A file has been created as $listfile and is being opened && sleep 1.5
-echo Type the name of Applications you want to include in the backup. && sleep 1.5
-echo If the app name contains a space write only the first block. && sleep 1.5
-echo Ex. Write only “Time” instead of “Time Machine” && sleep 1.5
-echo Note that maybe one or two extra apps get copied. Remove them manually. && sleep 1.5
-echo If the app is in a folder write that first. && sleep 1.5
-echo Ex. Utilities/Terminal instead of Terminal. && sleep 1.5
-echo Save the file after typing the names and close it. && sleep 1.5
-echo The file already has some important apps that will be backed up. && sleep 1.5
-echo Building SLE Kexts Lists. && sleep 1.5
-echo SLE Kexts that will be backed up are :- && sleep 0.5
-_ECHOKEXTLISTS 2>/dev/null
-echo Press [ENTER] if you are ready. && read fuck && open -e $listfile && sleep 5
-echo Press [ENTER] again when you are done. && read fuckyouagain
-
-# Now we will initiate the backup process and exit
-
-echo Backing Up All Data On $date
-_INITIATEBACKUP
-echo Signing The Process… && sleep 2.4
-_ADDSIGN
-_EFIUMOUNT
-sleep 1
-echo Backed Up All Data on $date at $backupfolder
-
-} # Function Generate Backup Ends Here.
-
-# Function to restore the generated backup
-
-function _RESTOREBACKUP()
-{
-
-# Runtime functions declaration
-
-echo Initiating backup restoration protocol..
-echo Please enter the backup folder\’s timestamp.
-read ts
-
-bkfolder=$desktop/Backnk_On_$ts
-kexts1=/EFIM/EFI/CLOVER/kexts/
-uefidrivers1=/EFIM/EFI/CLOVER/drivers64UEFI/
-configs1=/EFIM/EFI/CLOVER/
-acpi1=/EFIM/EFI/CLOVER/ACPI/patched/
-apps1=/Applications/
-
-kextsfolder1=$bkfolder/Injected_Kexts/
-uefidriversfolder1=$bkfolder/Drivers/
-configsfolder1=$bkfolder/Configs/
-acpifolder1=$bkfolder/ACPI/
-appfolder1=$bkfolder/Applications/
-slekextsfolder1=$bkfolder/SLE_Kexts/
-
-function _ABORT()
-{
-echo Aborting… && say -v Vicki Aborting. &>/dev/null
-if [ -e /EFIM ];
-then
-_EFIUMOUNT
-fi
-exit $1
-}
-
-function _CHECKBKFOLDER()
-{
-if [ -e $bkfolder ];
-then
-echo Backup Folder Verified As $bkfolder
-else
-echo Backup Folder $bkfolder not found.
-_ABORT
-fi
-}
-
-function _ADDSIGN(){
-touch $bkfolder/signature.txt
-echo X >>$bkfolder/signature.txt
-echo Script Coded By Black.dragon74 >> $bkfolder/signature.txt
-echo Restored This Data On $date at $time IST>> $bkfolder/signature.txt
-}
-
-function _CHECKCLOVER()
-{
-echo Checking If Clover Is Installed…
-if [ -e /EFIM/EFI/CLOVER ];
-then
-echo Clover Is Installed. Good to Go.
-else
-echo Arghhh. CLOVER NOT FOUND. INSTALL THAT FIRST.
-_ABORT
-fi
-}
-
-function _RESTOREDATA()
-{
-cp -R $kextsfolder1 $kexts1
-cp -R $uefidriversfolder1 $uefidrivers1
-cp -R $configsfolder1 $configs1
-cp -R $acpifolder1 $acpi1
-cp -R $appfolder1 $apps1
-}
-
-function _ECHOSLEKEXT()
-{
-echo Please Install The Following Kexts Manually :-
-for f in $(ls $slekextsfolder1); do
-	echo -e $slekextsfolder1$f && sleep 0.5
-done
-}
-
-function _INITIATERESTORE()
-{
-if [ -e /EFIM/EFI ];
-then
-echo Unmounting Already Mounted Partition…
-_EFIUMOUNT
-else
-sleep 1
-fi
-_EFIMOUNT
-_CHECKBKFOLDER
-_CHECKCLOVER
-echo Restoring the data…
-_RESTOREDATA 2>/dev/null
-_ECHOSLEKEXT
-echo Adding Signature
-_ADDSIGN
-_EFIUMOUNT
-echo Exiting… && exit $1
-}
-
-# Now Let’s do the thing
-
-_INITIATERESTORE
-
-# Goodbye!
-
-} # Function restore backup ends here
-
-function _PREPAREAFT()
-{
-echo Preparing Android File Transfer™ for use.
-if [ -e /Applications/Android\ File\ Transfer.app ];
-then
-rm -rf /Applications/Android\ File\ Transfer.app
-fi
-cp -rf /aft /Applications/Android\ File\ Transfer.app
-echo Done. Open from App-Drawer.
-echo It causes issues on a hackintosh so unload after use.
-exit $1
-}
-
-function _UNLOADAFT()
-{
-echo Killing Android File Transfer™.
-rm -rf /Applications/Android\ File*
-echo Done.
-exit $1
-}
-
-# Function loop to determine the n(k)it argument passed.
-case $1 in
-	[hH][eE][lL][pP]|[-][hH])
-		_PRINTHELP
-		;;
-	[bB][aA][cC][kK][uU][pP]|[-][bB])
-		_PRINTHEADER
-		_GENERATEBACKUP
-		;;
-	[rR][eE][sS][tT][oO][rR][eE]|[-][rR])
-		_PRINTHEADER
-		_RESTOREBACKUP
-		;;
-	[eE][fF][iI][mM]|[-][eE][mM])
-		_PRINTHEADER
-		_EFIMOUNT
-		;;
-	[eE][fF][iI][uU]|[-][eE][uU])
-		_PRINTHEADER
-		_EFIUMOUNT
-		;;
-	[pP][rR][eE][pP][aA][rR][eE][aA][fF][tT]|[-][aA][fF][tT])
-		_PRINTHEADER
-		_PREPAREAFT
-		;;
-	[uU][nN][lL][oO][aA][dD][aA][fF][tT]|[-][uU][aA][fF][tT])
-		_PRINTHEADER
-		_UNLOADAFT
-		;;
-	*)
-		_PRINTHELP
-		;;
-esac
