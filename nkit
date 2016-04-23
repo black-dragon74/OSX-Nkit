@@ -3,7 +3,7 @@
 # This is an attempt to recode the N(k)it™ framework for OSX for a much cleaner and easier interpretation.
 
 # This version will be published as ver 2.0 of the N(k)it™ framework
-scriptVersion=2.0
+scriptVersion=2.1
 
 # Let's start with declaring the local variables first.
 
