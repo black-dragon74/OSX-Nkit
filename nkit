@@ -267,3 +267,14 @@ function backupData()
 
 	# We are done with the backup.
 }
+
+# Read the arguments passed and do the needful
+# Note that commands will be added as and when they are available
+case $1 in
+	[bB][aA][cC][kK][uU][pP]|[-][bB])
+		backupData
+		;;
+	*)
+		printHelp
+		;;
+esac
