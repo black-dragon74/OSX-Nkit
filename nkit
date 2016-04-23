@@ -13,12 +13,12 @@ date=$(date "+%d-%m-%y") # This is the date in the Indian Style as DD-MM-YY for 
 time=$(date "+%T") # Get the time in HH:MM:SS format.
 efilocation=/dev/disk0s1 # This is generally the location of EFI. Change it in case.
 backupfolder=$desktop/Backup_On_$date/ # The location of the backup folder, date is added for multiple backups.
-restorefolder=$desktop/Backup_On_$timestamp/ # The folder from which the data will be restored. $timestamp will be read by the restoration function.
 efifolder=/Volumes/EFI/EFI/ # We will be using the diskutil approach to mount the fs so no more temp dir creation. Do not use /EFI it is more of a dummy folder for UEFI based install. Use that only on Clover Legacy.
-clover=$efifolder/CLOVER # This is the location where the clover bootloader is generally installed. Change it if necessary.
+clover=$efifolder/CLOVER/ # This is the location where the clover bootloader is generally installed. Change it if necessary.
 dsdt=$clover/ACPI/patched/ # The location of all DSDTs and SSDTs.
 config=$clover/ # The location of all config files. Some users have some plists backup so we will count them in.
 drivers=$clover/drivers64UEFI/ # The location of all clover drivers.
+applocation=/Applications/ # The location where the Apps are located. Nah, that's not typo. It is app-location.
 injectedkexts=$clover/kexts/ # The location of all (Ke)rnel E(xt)ensions.
 slekextlist=~/slekextlist
 
@@ -30,15 +30,6 @@ driversbackup=$backupfolder/Clover_Drivers/
 injectedkextsbackup=$backupfolder/Injected_Kexts/
 slekextsbackup=$backupfolder/SLE_Kexts/
 appsbackup=$backupfolder/Applications/
-
-# As the restoration folder will differ. We will declare the same variables for restoration again with some difference.
-
-dsdtrestore=$restorefolder/DSDT/
-configrestore=$restorefolder/Configs/
-driversrestore=$restorefolder/Clover_Drivers/
-injectedkextsrestore=$restorefolder/Injected_Kexts/
-slekextsrestore=$restorefolder/SLE_Kexts/
-appsrestore=$restorefolder/Applications/
 
 # We are done with the variables. If some fuction requires some variables they will be declared within the function's scope.
 
@@ -268,6 +259,75 @@ function backupData()
 	# We are done with the backup.
 }
 
+# Starting with the Restore Function.
+function restoreData()
+{
+	printHeader # First things first.
+	echo -e "Starting restore of data."
+	echo -e "A few things will be verified first."
+	echo -e "You are requested to enter the timestamp of the backup folder."
+	echo -e "Enter it in dd-mm-yy format and press [ENTER]"
+	read timestamp
+	restorefolder=$desktop/Backup_On_$timestamp
+	# Now we verify if the information provided is correct.
+	if [ -e $restorefolder ];
+		then
+		echo -e "Backup folder exists and is verified."
+	else
+		echo -e "Backup folder not found. Aborting."
+		exit $1
+	fi
+	# Time to mount EFI as we will be restoring configs and some other EFI related stuffs.
+	mountEFI
+
+	# Let's start the restore by first verifying if CLOVER is installed.
+	if [ -e $clover ];
+		then
+		echo -e "Clover is installed. Good to go."
+	else
+		echo -e "Clover is not installed. Aborting."
+		# Unmount EFI too. Silently.
+		unmountEFI &>/dev/null
+		exit $1
+	fi
+
+	# Let's start restoring the stuffs.
+	# Configs first
+	cp -rf $restorefolder/Configs/* $clover
+
+	# DSDTs and SSDTs follow
+	cp -rf $restorefolder/DSDT/* $dsdt/
+
+	# Clover's Drivers now
+	cp -rf $restorefolder/Clover_Drivers/* $drivers/
+
+	# Injected Kexts
+	cp -rf $restorefolder/Injected_Kexts/* $injectedkexts/
+
+	# Apps at last.
+	cp -rf $restorefolder/Applications/* $applocation/
+
+	# As of now we won't install SLE kexts. So tell user to do that manuallly.
+	# To echo the list of kexts.
+	echo -e "Please install the following kexts manuallly."
+	echo -e "You can use KextBeast, KextWizard or iKext. You rule."
+	for f in $(ls $restorefolder/SLE_Kexts/); do
+		echo $f && sleep 0.5
+	done
+
+	# Add entry to log file
+	echo -e "Logging to file.." && sleep 1
+	echo -e "Restored this data on $date at $time"			>>$restorefolder/log.txt
+	echo -e ""												>>$restorefolder/log.txt
+
+	# And we're done
+	echo -e "Restore complete on $date at $time"
+
+	# Sayonara
+	unmountEFI
+	exit $1
+}
+
 # Read the arguments passed and do the needful
 # Note that commands will be added as and when they are available
 # Update - Convert arguments checker into function.
@@ -277,8 +337,19 @@ function main()
 		[bB][aA][cC][kK][uU][pP]|[-][bB])
 			backupData
 			;;
+		[rR][eE][sS][tT][oO][rR][eE]|[-][rR])
+			restoreData
+			;;
 		*)
 			printHelp
 			;;
 	esac
 }
+
+#============================    READ ARGS AND START PROGRAM      =================================
+
+clear
+
+main $1
+
+#==================================================================================================
