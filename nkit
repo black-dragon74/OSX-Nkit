@@ -50,7 +50,7 @@ function mountEFI()
 	else
 		# Mount the partition
 		echo -e "Mounting EFI Partition."
-		diskutil mount $efilocation
+		diskutil mount $efilocation &>/dev/null
 	fi 
 }
 
@@ -60,7 +60,8 @@ function unmountEFI()
 	if [ -f /Volumes/EFI ];
 		then
 		# Unmount the volume
-		diskutil unmount $efilocation
+		diskutil unmount $efilocation &>/dev/null
+		echo -e "Unmounted EFI Partition."
 	else
 		# Skip
 		echo -e "Volume already unmounted."
