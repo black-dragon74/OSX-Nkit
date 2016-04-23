@@ -3,6 +3,7 @@
 # This is an attempt to recode the N(k)it™ framework for OSX for a much cleaner and easier interpretation.
 
 # This version will be published as ver 2.0 of the N(k)it™ framework
+scriptVersion=2.0
 
 # Let's start with declaring the local variables first.
 
@@ -65,12 +66,12 @@ function unmountEFI()
 
 function printHeader()
 {
-	echo N\(k\)it™ ver 1.0 by $author is running on $(sw_vers -productName) $(sw_vers -productVersion)
+	echo N\(k\)it™ ver $scriptVersion by $author is running on $(sw_vers -productName) $(sw_vers -productVersion)
 }
 
 function printHelp()
 {
-	echo N\(k\)it™ ver 1.0 by $author is running on $(sw_vers -productName) $(sw_vers -productVersion)
+	echo N\(k\)it™ ver $scriptVersion by $author is running on $(sw_vers -productName) $(sw_vers -productVersion)
 	echo usage\: nkit [help]\|[-h] Prints help\(this\) information.
 	echo \ \ \ \ \ \ \ nkit [backup]\|[-b] Generates a backup of important hackintosh files.
 	echo \ \ \ \ \ \ \ nkit [restore]\|[-r] Restores the generated backup.
