@@ -7,18 +7,20 @@
 # Let's start with declaring the local variables first.
 
 home=$(echo $HOME) # Fetch the location of the home directory.
-desktop=home/Desktop # Define the location of the desktop. ~/Desktop would have been an easier approach but was not used.
+desktop=$home/Desktop # Define the location of the desktop. ~/Desktop would have been an easier approach but was not used.
+author=black.dragon74 # Don't change it unless you have permission to do so
 date=$(date "+%d-%m-%y") # This is the date in the Indian Style as DD-MM-YY for international standard use date=$(date "+%m-%d-%y").
 time=$(date "+%T") # Get the time in HH:MM:SS format.
 efilocation=/dev/disk0s1 # This is generally the location of EFI. Change it in case.
-backupfolder=$desktop/Backup_On_$date # The location of the backup folder, date is added for multiple backups.
-restorefolder=$desktop/Backup_On_$timestamp # The folder from which the data will be restored. $timestamp will be read by the restoration function.
+backupfolder=$desktop/Backup_On_$date/ # The location of the backup folder, date is added for multiple backups.
+restorefolder=$desktop/Backup_On_$timestamp/ # The folder from which the data will be restored. $timestamp will be read by the restoration function.
 efifolder=/Volumes/EFI/EFI/ # We will be using the diskutil approach to mount the fs so no more temp dir creation. Do not use /EFI it is more of a dummy folder for UEFI based install. Use that only on Clover Legacy.
 clover=$efifolder/CLOVER # This is the location where the clover bootloader is generally installed. Change it if necessary.
 dsdt=$clover/ACPI/patched/ # The location of all DSDTs and SSDTs.
-config=$clover/*.plist # The location of all config files. Some users have some plists backup so we will count them in.
+config=$clover/ # The location of all config files. Some users have some plists backup so we will count them in.
 drivers=$clover/drivers64UEFI/ # The location of all clover drivers.
 injectedkexts=$clover/kexts/ # The location of all (Ke)rnel E(xt)ensions.
+slekextlist=~/slekextlist
 
 # Location of folders on the backup directory. These are the folders where the data will be backed up.
 
@@ -27,6 +29,7 @@ configbackup=$backupfolder/Configs/
 driversbackup=$backupfolder/Clover_Drivers/
 injectedkextsbackup=$backupfolder/Injected_Kexts/
 slekextsbackup=$backupfolder/SLE_Kexts/
+appsbackup=$backupfolder/Applications/
 
 # As the restoration folder will differ. We will declare the same variables for restoration again with some difference.
 
@@ -35,6 +38,7 @@ configrestore=$restorefolder/Configs/
 driversrestore=$restorefolder/Clover_Drivers/
 injectedkextsrestore=$restorefolder/Injected_Kexts/
 slekextsrestore=$restorefolder/SLE_Kexts/
+appsrestore=$restorefolder/Applications/
 
 # We are done with the variables. If some fuction requires some variables they will be declared within the function's scope.
 
@@ -43,7 +47,7 @@ slekextsrestore=$restorefolder/SLE_Kexts/
 function mountEFI()
 {
 	# Check if the volume is aready mounted.
-	if [ -f /Volumes/EFI ];
+	if [ -e /Volumes/EFI ];
 		then 
 		# Skip remount
 		echo -e "Volume already mounted. Skipping remount."
@@ -57,7 +61,7 @@ function mountEFI()
 function unmountEFI()
 {
 	# Check if the volume is mounted. Then only attemp unmount.
-	if [ -f /Volumes/EFI ];
+	if [ -e /Volumes/EFI ];
 		then
 		# Unmount the volume
 		diskutil unmount $efilocation &>/dev/null
@@ -83,4 +87,183 @@ function printHelp()
 	echo \ \ \ \ \ \ \ nkit [efiu]\|[-eu] Unmounts the EFI Partition.
 	echo \ \ \ \ \ \ \ nkit [prepareaft]\|[-aft] Revives Android File Transfer™ from death\-bed.
 	echo \ \ \ \ \ \ \ nkit [unloadaft]\|[-uaft] Puts Android File Transfer™ to death\-bed.
+}
+
+function backupData()
+{
+	# Tell user about the things that will be backed up.
+	printHeader # First things first.
+	echo -e "Starting the backup of your hackintosh."
+	echo -e "The things that will be backep up include :-"
+	echo -e "Patched DSDTs if any"
+	echo -e "All Clover related config files"
+	echo -e "Drivers required for proper functionality of Clover"
+	echo -e "Injected Kexts from Clover"
+	echo -e "Important SLE Kexts"
+
+	# Prepare a local list of SLE Kexts that are necessary for a hack. Add any kext you wish below.
+	if [ -e $slekextlist ];
+		then
+		rm -f $slekextlist
+	fi
+	touch $slekextlist
+	echo -e "CodecComm"							>>$slekextlist
+	echo -e "NullCPU"							>>$slekextlist
+	echo -e "ACPIBacklight"						>>$slekextlist
+	echo -e "ACPIBattery"						>>$slekextlist
+	echo -e "AHCIPortInjector"					>>$slekextlist
+	echo -e "AppleNForceATA"					>>$slekextlist
+	echo -e "ApplePCIIDE"						>>$slekextlist
+	echo -e "AppleHDA.k"						>>$slekextlist
+	echo -e "ATAPortInjector"					>>$slekextlist
+	echo -e "FakePCIID_"						>>$slekextlist
+	echo -e "FakePCIID.k"						>>$slekextlist
+	echo -e "FakeSMC"							>>$slekextlist
+	echo -e "GenericUSB"						>>$slekextlist
+	echo -e "HDA"								>>$slekextlist
+	echo -e "IntelBacklight"					>>$slekextlist
+	echo -e "IOAHCIBlock"						>>$slekextlist
+	echo -e "RealtekRTL"						>>$slekextlist
+	echo -e "SuperVIAATA"						>>$slekextlist
+	echo -e "VoodooP"							>>$slekextlist
+	echo -e "VoodooH"							>>$slekextlist
+
+	# Tell the user about the kexts that are to be backed up.
+	echo -e "The SLE kexts that will be included in the backup are :-"
+	for f in $(cat $slekextlist); do
+		if [ -e /System/Library/Extensions/$f* ]; # To prevent the errors we will check if the file exists.
+			then
+			echo -e /System/Library/Extensions/$f* && sleep 0.5
+		fi
+	done
+
+	# Now time to generate the copies of the list of Apps that will be backed up
+	# We will create a file named list.txt on user's desktop and fill it with some Important Apps.
+	listfile=$desktop/list.txt
+	if [ -e $listfile ];
+		then
+		rm -f $listfile
+	fi
+	touch $listfile
+	echo -e "A file has been created on your desktop as $listfile."
+	echo -e "It contains the name of some apps that are to be backed up."
+	echo -e "Add the name of the apps that you want to include in the backup."
+	echo -e "If the app is in a folder write that first. Ex. Utilities/Terminal"
+	echo -e "Do not add the .app extension in the list file."
+
+	# Populate the listfile with some default values.
+	echo -e "Clover"							>>$listfile
+	echo -e "IO"								>>$listfile
+	echo -e "iExplorer"							>>$listfile
+	echo -e "Kext"								>>$listfile
+	echo -e "MaciASL"							>>$listfile
+	echo -e "DPCI"								>>$listfile
+	echo -e "Voodoo"							>>$listfile
+
+	# Open the file now
+	echo -e "The file will be opened after 1 second."
+	echo -e "You have 5 second(s) to save the file after writing the names."
+	sleep 1
+	open -e $listfile
+	sleep 5
+
+	# Now we continue.
+	# We will create a file in which we will prefix /Applications/. Using (S)tream (Ed)itor.
+	plistfile=$desktop/plist.txt
+	if [ -e $plistfile ];
+		then
+		rm -f $plistfile
+	fi
+	touch $plistfile
+	sed 's/^/\/Applications\//g' $listfile >> $plistfile
+
+	# Time to tell the user what will be backed up from /Applications folder
+	echo -e "The Apps that will be backed up are :-"
+	for f in $(cat $plistfile); do
+		if [ -e $f* ];
+			then
+			echo $f* && sleep 0.5
+		fi
+	done
+
+	# I guess we should create the folders for backup.
+	# Remove the folder if it exists.
+	if [ -f $backupfolder ];
+		then
+		rm -rf $backupfolder
+	fi
+
+	# Tell and create the folders.
+	echo -e "Creating the folders."
+	mkdir -p $dsdtbackup
+	mkdir -p $configbackup
+	mkdir -p $driversbackup
+	mkdir -p $injectedkextsbackup
+	mkdir -p $slekextsbackup
+	mkdir -p $appsbackup
+
+	# Time to start creating backup.
+	# Need to mount EFI.
+	mountEFI
+
+	# We will backup DSDTs first.
+	for f in $(ls $dsdt/*.aml); do
+		echo Backed Up $f* && sleep 0.5
+		cp -rf $f $dsdtbackup
+	done
+
+	# Configs
+	for f in $(ls $config/*.plist); do
+		echo Backed Up $f* && sleep 0.5
+		cp -rf $f $configbackup
+	done
+
+	# Drivers
+	for f in $(ls $drivers/*.efi); do
+		echo Backed Up $f* && sleep 0.5
+		cp -rf $f* $driversbackup
+	done
+
+	# Injected Kexts
+	cp -rf $injectedkexts $injectedkextsbackup
+	echo Backed Up Injected Kexts.
+
+	# SLE Kexts
+	for f in $(cat $slekextlist); do
+		if [ -e /System/Library/Extensions/$f* ];
+			then
+			echo Backed Up /System/Library/Extensions/$f* && sleep 0.3
+			cp -rf /System/Library/Extensions/$f* $slekextsbackup
+		fi
+	done
+
+	# Applications
+	for f in $(cat $plistfile); do
+		if [ -e $f* ];
+			then
+			cp -rf $f* $appsbackup 2>/dev/null # Some apps throw some unwanted erros do put them to the curb.
+			echo Backed Up $f* && sleep 0.5
+		fi
+	done
+
+	# Good things always have a log of everything.
+	log=$backupfolder/log.txt
+	if [ -e $log ];
+		then
+		rm -f $log
+	fi
+	touch $log
+	echo -e "Generating Log.." && sleep 0.8
+	echo -e "Backed Up All Data On $date at $time"	>>$log
+	echo -e ""										>>$log
+
+	# Remove the crap we created.
+	echo -e "Removing redunencies created."
+	rm -f $listfile
+	rm -f $plistfile
+
+	# Un mount the EFI partition as we are done with it.
+	unmountEFI
+
+	# We are done with the backup.
 }
