@@ -270,11 +270,15 @@ function backupData()
 
 # Read the arguments passed and do the needful
 # Note that commands will be added as and when they are available
-case $1 in
-	[bB][aA][cC][kK][uU][pP]|[-][bB])
-		backupData
-		;;
-	*)
-		printHelp
-		;;
-esac
+# Update - Convert arguments checker into function.
+function main()
+{
+	case $1 in
+		[bB][aA][cC][kK][uU][pP]|[-][bB])
+			backupData
+			;;
+		*)
+			printHelp
+			;;
+	esac
+}
