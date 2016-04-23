@@ -258,6 +258,25 @@ function backupData()
 	unmountEFI
 
 	# We are done with the backup.
+	# Ask user if he wants to open the folder.
+	read -p "Open the folder where data was backed up? Y/N: " ans
+	case $ans in
+		[yY]* )
+			echo -e "Opening folder in 1 second."
+			sleep 1
+			open $backupfolder
+			;;
+		[nN]* )
+			echo -e "Okay! You rule."
+			;;
+		* )
+			echo -e "Reply in Yes Or No (Y/N)"
+			;;
+	esac
+
+	# Now we exit
+	echo -e "Exiting Now."
+	exit $1
 }
 
 # Starting with the Restore Function.
