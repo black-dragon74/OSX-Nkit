@@ -3,7 +3,7 @@
 # This is an attempt to recode the N(k)it™ framework for OSX for a much cleaner and easier interpretation.
 
 # This version will be published as ver 2.0 of the N(k)it™ framework
-scriptVersion=2.2
+scriptVersion=2.3
 
 # Let's start with declaring the local variables first.
 
@@ -79,6 +79,7 @@ function printHelp()
 	echo \ \ \ \ \ \ \ nkit [efiu]\|[-eu] Unmounts the EFI Partition.
 	echo \ \ \ \ \ \ \ nkit [prepareaft]\|[-aft] Revives Android File Transfer™ from death\-bed.
 	echo \ \ \ \ \ \ \ nkit [unloadaft]\|[-uaft] Puts Android File Transfer™ to death\-bed.
+	echo \ \ \ \ \ \ \ nkit [update]\|[-up] Checks\ \for the update of the N\(k\)it.
 }
 
 function backupData()
@@ -389,6 +390,43 @@ function unloadAFT()
 	# And we're done
 }
 
+# An attempt to add the script updater.
+function checkUpdate()
+{
+	cd $home
+	echo -e "Checking the script version on the remote."
+	curl -o sVers https://raw.githubusercontent.com/black-dragon74/OSX-Nkit/osx/sVers &>/dev/null
+	chmod 644 ./sVers
+	if [ $(cat ./sVers) == $scriptVersion ];
+		then
+		echo -e "Congrats. You already have the latest version of N(k)it™."
+		rm -f ./sVers
+	else
+		echo -e "Latest Version is $(cat ./sVers) and you are running $scriptVersion."
+		read -p "Update the scipt now? [Y/N] " uans
+		case $uans in
+			[yY]* )
+				echo -e "Initiating Update."
+				cd $home
+				echo -e "Downloading latest version."
+				curl -o nkit https://raw.githubusercontent.com/black-dragon74/OSX-Nkit/osx/nkit &>/dev/null
+				chmod 777 ./nkit
+				echo -e "Updating..." && sleep 0.5
+				sudo rm -f /bin/nkit
+				sudo cp -f ./nkit /bin/
+				echo -e "Done. You may now check the update by using nkit -up"
+				;;
+			[nN]* )
+				echo -e "Okay. But you should update for new features."
+				;;
+			* )
+				echo -e "Enter Yes/No or Y/N"
+				;;
+		esac
+		rm -f ./sVers
+	fi
+}
+
 # Read the arguments passed and do the needful
 # Note that commands will be added as and when they are available
 # Update - Convert arguments checker into function.
@@ -412,6 +450,9 @@ function main()
 			;;
 		[eE][fF][iI][uU]|[-][eE][uU])
 			unmountEFI
+			;;
+		[uU][pP][dD][aA][tT][eE]|[-][uU][pP])
+			checkUpdate
 			;;
 		*)
 			printHelp
