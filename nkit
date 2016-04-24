@@ -407,6 +407,12 @@ function main()
 		[uU][nN][lL][oO][aA][dD][aA][fF][tT]|[-][uU][aA][fF][tT])
 			unloadAFT
 			;;
+		[eE][fF][iI][mM]|[-][eE][mM])
+			mountEFI
+			;;
+		[eE][fF][iI][uU]|[-][eE][uU])
+			unmountEFI
+			;;
 		*)
 			printHelp
 			;;
