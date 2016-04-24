@@ -3,7 +3,7 @@
 # This is an attempt to recode the N(k)it™ framework for OSX for a much cleaner and easier interpretation.
 
 # This version will be published as ver 2.0 of the N(k)it™ framework
-scriptVersion=2.3
+scriptVersion=2.3.1
 
 # Let's start with declaring the local variables first.
 
@@ -399,7 +399,7 @@ function checkUpdate()
 	chmod 644 ./sVers
 	if [ $(cat ./sVers) == $scriptVersion ];
 		then
-		echo -e "Congrats. You already have the latest version of N(k)it™."
+		echo -e "Congrats. You already have the latest version of N(k)it™ i.e. $scriptVersion"
 		rm -f ./sVers
 	else
 		echo -e "Latest Version is $(cat ./sVers) and you are running $scriptVersion."
