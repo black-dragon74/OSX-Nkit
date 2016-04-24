@@ -3,7 +3,7 @@
 # This is an attempt to recode the N(k)it™ framework for OSX for a much cleaner and easier interpretation.
 
 # This version will be published as ver 2.0 of the N(k)it™ framework
-scriptVersion=2.1
+scriptVersion=2.2
 
 # Let's start with declaring the local variables first.
 
@@ -348,6 +348,47 @@ function restoreData()
 	exit $1
 }
 
+# Function to prepare Android File Transfer for use.
+# Note: AFT causes serious issues with USB operations on a Hackintosh.
+# 		It also causes serious issues in the operation of Brcm Patches kexts.
+#		So you are advised to unload it after user.
+function prepareAFT()
+{
+	printHeader
+	echo -e "Preparing Android File Transfer™ for use."
+	# Check if AFT™ exists. If yes then remove it.
+	if [ -e /Applications/Android\ File\ Transfer.app ];
+		then
+		rm -rf /Applications/Android\ File\ Transfer.app
+	fi
+	# Copy the aft located in the root of your drive as "aft" in frozen state.
+	cp -rf /aft /Applications/Android\ File\ Transfer.app
+	echo -e "Done. Open from App-Drawer." && sleep 0.5
+	echo -e "It causes issues on a hackintosh so unload after use." && sleep 0.5
+	echo -e "You may use nkit -uaft or nkit unloadaft to do so." && sleep 0.5
+	exit $1
+}
+
+# Function to remove the App from Applications.
+function unloadAFT()
+{
+	printHeader
+	# Check if it is installed.
+	if [ -e /Applications/Android\ File\ Transfer.app ];
+		then
+		echo -e "Removing Android File Transfer." && sleep 0.5
+		rm -rf /Applications/Android\ File\ Transfer.app
+		echo -e "Done."
+		exit $1
+	else
+		echo -e "App not found. Have you loaded it?" && sleep 0.5
+		echo -e "You may use nkit -aft or nkit prepareaft to do so." && sleep 0.5
+		echo -e "Exiting."
+		exit $1
+	fi
+	# And we're done
+}
+
 # Read the arguments passed and do the needful
 # Note that commands will be added as and when they are available
 # Update - Convert arguments checker into function.
@@ -359,6 +400,12 @@ function main()
 			;;
 		[rR][eE][sS][tT][oO][rR][eE]|[-][rR])
 			restoreData
+			;;
+		[pP][rR][eE][pP][aA][rR][eE][aA][fF][tT]|[-][aA][fF][tT])
+			prepareAFT
+			;;
+		[uU][nN][lL][oO][aA][dD][aA][fF][tT]|[-][uU][aA][fF][tT])
+			unloadAFT
 			;;
 		*)
 			printHelp
