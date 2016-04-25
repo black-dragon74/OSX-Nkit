@@ -3,7 +3,7 @@
 # This is an attempt to recode the N(k)it™ framework for OSX for a much cleaner and easier interpretation.
 
 # This version will be published as ver 2.0 of the N(k)it™ framework
-scriptVersion=2.3.1
+scriptVersion=2.4
 
 # Let's start with declaring the local variables first.
 
@@ -314,27 +314,40 @@ function restoreData()
 
 	# Let's start restoring the stuffs.
 	# Configs first
+	echo -e "Restoring Configs."
 	cp -rf $restorefolder/Configs/* $clover
 
 	# DSDTs and SSDTs follow
+	echo -e "Restoring DSDTs/SSDTs"
 	cp -rf $restorefolder/DSDT/* $dsdt/
 
 	# Clover's Drivers now
+	echo -e "Restoring Drivers."
 	cp -rf $restorefolder/Clover_Drivers/* $drivers/
 
 	# Injected Kexts
+	echo -e "Restoring Injected kexts."
 	cp -rf $restorefolder/Injected_Kexts/* $injectedkexts/
 
 	# Apps at last.
-	cp -rf $restorefolder/Applications/* $applocation/
+	echo -e "Restoring Applications."
+	sudo cp -rf $restorefolder/Applications/* $applocation/
 
-	# As of now we won't install SLE kexts. So tell user to do that manuallly.
-	# To echo the list of kexts.
-	echo -e "Please install the following kexts manuallly."
-	echo -e "You can use KextBeast, KextWizard or iKext. You rule."
+	# Update - Install SLE kexts.
+	echo -e "Installing Kexts to System."
 	for f in $(ls $restorefolder/SLE_Kexts/); do
-		echo $f && sleep 0.5
+		sudo cp -rf $restorefolder/SLE_Kexts/$f /System/Library/Extensions/
+		sudo chmod -R 755 /System/Library/Extensions/$f
+		sudo chown -R root:wheel /System/Library/Extensions/$f
+		echo -e "Installed $f"
 	done
+	# Rebuild kext cache
+	echo -e "Rebuilding Kext cache. This may take a while."
+	sudo touch /System/Library/Extensions/ && sudo kextcache -u / &>/dev/null
+	# Rebuild system prelinked kernel
+	echo -e "Rebuilding System Prelinked Kernel. This might take a moment."
+	sudo kextcache -system-prelinked-kernel &>/dev/null
+	echo -e "Done Installing Kexts."
 
 	# Add entry to log file
 	echo -e "Logging to file.." && sleep 1
