@@ -3,7 +3,7 @@
 # This is an attempt to recode the N(k)it™ framework for OSX for a much cleaner and easier interpretation.
 
 # This version will be published as ver 2.0 of the N(k)it™ framework
-scriptVersion=2.5.1
+scriptVersion=2.6
 
 # Let's start with declaring the local variables first.
 
@@ -406,6 +406,29 @@ function unloadAFT()
 # An attempt to add the script updater.
 function checkUpdate()
 {
+	# Attempt to add option of force update.
+	case $2 in
+		[fF][oO][rR][cC][eE]|[-][-][fF][oO][rR][cC][eE] )
+			printHeader
+			sudo rm -rf ~/Library/Caches/com.apple.Terminal* &>/dev/null
+			cd $home
+			echo -e "Forcing Update."
+			echo -e "Downloading latest version."
+			curl -o nkit https://raw.githubusercontent.com/black-dragon74/OSX-Nkit/osx/nkit &>/dev/null
+			chmod 777 ./nkit
+			echo -e "Force Updating..." && sleep 0.5
+			sudo rm -f /bin/nkit
+			sudo cp -f ./nkit /bin/
+			echo -e "Done."
+			rm -f ./nkit
+			exit
+			;;
+		* )
+			echo Invalid option $2. See Help.
+			exit
+			;;
+	esac
+
 	cd $home
 	# Clear terminal cache as it might be a problem for curl.
 	sudo rm -rf ~/Library/Caches/com.apple.Terminal* &>/dev/null
@@ -468,7 +491,7 @@ function main()
 			unmountEFI
 			;;
 		[uU][pP][dD][aA][tT][eE]|[-][uU][pP])
-			checkUpdate
+			checkUpdate $1 $2 #Check Args in-case it is forced update.
 			;;
 		*)
 			printHelp
@@ -480,6 +503,6 @@ function main()
 
 clear
 
-main $1
+main $1 $2
 
 #==================================================================================================
