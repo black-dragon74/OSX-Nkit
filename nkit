@@ -3,7 +3,7 @@
 # This is an attempt to recode the N(k)it™ framework for OSX for a much cleaner and easier interpretation.
 
 # This version will be published as ver 2.0 of the N(k)it™ framework
-scriptVersion=2.4
+scriptVersion=2.5
 
 # Let's start with declaring the local variables first.
 
@@ -378,8 +378,8 @@ function prepareAFT()
 	# Copy the aft located in the root of your drive as "aft" in frozen state.
 	cp -rf /aft /Applications/Android\ File\ Transfer.app
 	echo -e "Done. Open from App-Drawer." && sleep 0.5
-	echo -e "It causes issues on a hackintosh so unload after use." && sleep 0.5
-	echo -e "You may use nkit -uaft or nkit unloadaft to do so." && sleep 0.5
+	read -p "Press [ENTER] when you are done with it. Press Ctrl+C to terminate." something
+	unloadAFT
 	exit $1
 }
 
