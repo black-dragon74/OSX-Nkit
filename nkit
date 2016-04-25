@@ -79,7 +79,8 @@ function printHelp()
 	echo \ \ \ \ \ \ \ nkit [efiu]\|[-eu] Unmounts the EFI Partition.
 	echo \ \ \ \ \ \ \ nkit [prepareaft]\|[-aft] Revives Android File Transfer™ from death\-bed.
 	echo \ \ \ \ \ \ \ nkit [unloadaft]\|[-uaft] Puts Android File Transfer™ to death\-bed.
-	echo \ \ \ \ \ \ \ nkit [update][force]\|[-up][--force] Checks\ \for the update of the N\(k\)it / Forces Update.
+	echo \ \ \ \ \ \ \ nkit [update][force]\|[-up][--force] Checks\/Forces \for the update of the N\(k\)it.
+	echo \ \ \ \ \ \ \ nkit [version]\|[-v] Shows the version of the program.
 }
 
 function backupData()
@@ -492,6 +493,9 @@ function main()
 			;;
 		[uU][pP][dD][aA][tT][eE]|[-][uU][pP])
 			checkUpdate $1 $2 #Check Args in-case it is forced update.
+			;;
+		[vV][eE][rR][sS]*|[-][vV] )
+			echo $scriptVersion
 			;;
 		*)
 			printHelp
