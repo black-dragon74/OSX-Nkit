@@ -407,6 +407,8 @@ function unloadAFT()
 function checkUpdate()
 {
 	cd $home
+	# Clear terminal cache as it might be a problem for curl.
+	sudo rm -rf ~/Library/Caches/com.apple.Terminal* &>/dev/null
 	echo -e "Checking the script version on the remote."
 	curl -o sVers https://raw.githubusercontent.com/black-dragon74/OSX-Nkit/osx/sVers &>/dev/null
 	chmod 644 ./sVers
