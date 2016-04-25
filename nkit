@@ -437,6 +437,7 @@ function checkUpdate()
 				;;
 		esac
 		rm -f ./sVers
+		rm -f ./nkit
 	fi
 }
 
