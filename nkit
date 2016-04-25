@@ -79,7 +79,7 @@ function printHelp()
 	echo \ \ \ \ \ \ \ nkit [efiu]\|[-eu] Unmounts the EFI Partition.
 	echo \ \ \ \ \ \ \ nkit [prepareaft]\|[-aft] Revives Android File Transfer™ from death\-bed.
 	echo \ \ \ \ \ \ \ nkit [unloadaft]\|[-uaft] Puts Android File Transfer™ to death\-bed.
-	echo \ \ \ \ \ \ \ nkit [update]\|[-up] Checks\ \for the update of the N\(k\)it.
+	echo \ \ \ \ \ \ \ nkit [update][force]\|[-up][--force] Checks\ \for the update of the N\(k\)it / Forces Update.
 }
 
 function backupData()
