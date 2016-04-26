@@ -3,7 +3,7 @@
 # This is an attempt to recode the N(k)it™ framework for OSX for a much cleaner and easier interpretation.
 
 # This version will be published as ver 2.0 of the N(k)it™ framework
-scriptVersion=2.9
+scriptVersion=3.0
 
 # Let's start with declaring the local variables first.
 
@@ -81,6 +81,7 @@ function printHelp()
 	echo \ \ \ \ \ \ \ nkit [unloadaft]\|[-uaft] Puts Android File Transfer™ to death\-bed.
 	echo \ \ \ \ \ \ \ nkit [update][force]\|[-up][--force] Check\/Force update of N\(k\)it.
 	echo \ \ \ \ \ \ \ nkit [version]\|[-v] Shows the version of the program.
+	echo \ \ \ \ \ \ \ nkit [preparemyhack]\|[-pmh] Download and \install base stuffs.
 }
 
 function backupData()
@@ -500,14 +501,18 @@ function prepareMyHack()
 	echo -e "Follow on-screen instructions carefully." && sleep 0.5
 	echo -e "Downloading required files."
 	cd $home
-	curl -o basefile.zip https://raw.githubusercontent.com/black-dragon74/OSX-Nkit/defaultconfig.zip
+	rm -f ./basefile.zip 2>/dev/null
+	curl -o basefile.zip https://raw.githubusercontent.com/black-dragon74/OSX-Nkit/osx/defaultconfig.zip &>/dev/null
 	chmod 755 ./basefile.zip
 	# Now we unzip the file
+	echo -e "Deflating the files."
 	unzip -qu ./basefile.zip -d ~/Desktop/
+	rm -f ./basefile.zip 2>/dev/null
 	# We have placed the file on the desktop.
 	# Now we will initiate the restore. But, tell the user first of all.
-	echo -e "A folder has been placed on your desktop. Enter the timestamp of that folder."
+	echo -e "A folder has been placed on your desktop. Enter the timestamp when asked."
 	restoreData
+
 	# Done
 }
 
