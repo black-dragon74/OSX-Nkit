@@ -3,7 +3,7 @@
 # This is an attempt to recode the N(k)it™ framework for OSX for a much cleaner and easier interpretation.
 
 # This version will be published as ver 2.0 of the N(k)it™ framework
-scriptVersion=2.7
+scriptVersion=2.8
 
 # Let's start with declaring the local variables first.
 
@@ -422,7 +422,7 @@ function checkUpdate()
 				echo -e "Force Updating..." && sleep 0.5
 				sudo rm -f /bin/nkit
 				sudo cp -f ./nkit /bin/
-				echo -e "Done."
+				verifyUpdate
 				rm -f ./nkit
 				exit
 				;;
@@ -455,7 +455,7 @@ function checkUpdate()
 					echo -e "Updating..." && sleep 0.5
 					sudo rm -f /bin/nkit
 					sudo cp -f ./nkit /bin/
-					echo -e "Done. You may now check the update by using nkit -up"
+					verifyUpdate
 					;;
 				[nN]* )
 					echo -e "Okay. But you should update for new features."
@@ -468,6 +468,25 @@ function checkUpdate()
 			rm -f ./nkit
 		fi
 	fi
+}
+
+# Try to add the function to verify if the Update was successful else force it.
+function verifyUpdate()
+{
+	echo -e "Verifying Update."
+	cd $home
+	curl -o sVers https://raw.githubusercontent.com/black-dragon74/OSX-Nkit/osx/sVers &>/dev/null
+	chmod 644 ./sVers
+	if [ $(cat ./sVers) == $scriptVersion ];
+		then
+		echo -e "Update has been verified and is complete."
+		rm -f ./sVers
+	else
+		echo -e "Update failed due to some reason."
+		echo -e "Attempting re-update (forced)."
+		nkit -up --force
+	fi
+	rm -f ./sVers
 }
 
 # Read the arguments passed and do the needful
