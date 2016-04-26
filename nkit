@@ -3,7 +3,7 @@
 # This is an attempt to recode the N(k)it™ framework for OSX for a much cleaner and easier interpretation.
 
 # This version will be published as ver 2.0 of the N(k)it™ framework
-scriptVersion=2.8
+scriptVersion=2.9
 
 # Let's start with declaring the local variables first.
 
@@ -109,6 +109,8 @@ function backupData()
 	echo -e "AppleNForceATA"					>>$slekextlist
 	echo -e "ApplePCIIDE"						>>$slekextlist
 	echo -e "AppleHDA.k"						>>$slekextlist
+	echo -e "ApplePS2Smart"						>>$slekextlist
+	echo -e "ApplePS2Elan"						>>$slekextlist
 	echo -e "ATAPortInjector"					>>$slekextlist
 	echo -e "FakePCIID_"						>>$slekextlist
 	echo -e "FakePCIID.k"						>>$slekextlist
