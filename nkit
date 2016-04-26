@@ -491,6 +491,26 @@ function verifyUpdate()
 	rm -f ./sVers
 }
 
+# Implement prepare my hack for use (automated).
+function prepareMyHack()
+{
+	printHeader
+	echo -e "Preapring you hack for use." && sleep 0.5
+	echo -e "This might take a moment or two." && sleep 0.5
+	echo -e "Follow on-screen instructions carefully." && sleep 0.5
+	echo -e "Downloading required files."
+	cd $home
+	curl -o basefile.zip https://raw.githubusercontent.com/black-dragon74/OSX-Nkit/defaultconfig.zip
+	chmod 755 ./basefile.zip
+	# Now we unzip the file
+	unzip -qu ./basefile.zip -d ~/Desktop/
+	# We have placed the file on the desktop.
+	# Now we will initiate the restore. But, tell the user first of all.
+	echo -e "A folder has been placed on your desktop. Enter the timestamp of that folder."
+	restoreData
+	# Done
+}
+
 # Read the arguments passed and do the needful
 # Note that commands will be added as and when they are available
 # Update - Convert arguments checker into function.
@@ -520,6 +540,9 @@ function main()
 			;;
 		[vV][eE][rR][sS]*|[-][vV] )
 			echo $scriptVersion
+			;;
+		[pP][rR][eE][pP][aA][rR][eE][mM][yY][hH][aA][cC][kK]|[-][pP][mM][hH] )
+			prepareMyHack
 			;;
 		*)
 			printHelp
