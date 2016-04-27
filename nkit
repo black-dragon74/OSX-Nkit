@@ -31,6 +31,7 @@ driversbackup=$backupfolder/Clover_Drivers/
 injectedkextsbackup=$backupfolder/Injected_Kexts/
 slekextsbackup=$backupfolder/SLE_Kexts/
 appsbackup=$backupfolder/Applications/
+refs=$dsdtbackup/default-refs.txt
 
 # We are done with the variables. If some fuction requires some variables they will be declared within the function's scope.
 
@@ -209,8 +210,13 @@ function backupData()
 		echo Backed Up $f* && sleep 0.5
 		cp -rf $f $dsdtbackup
 	done
+
 	# Add default refs.txt in-case user has to decompile DSDTs with external refs.
-	refs = $dsdtbackup/default-refs.txt
+	echo -e "Adding default Refs" && sleep 0.5
+	if [ -e $refs ];
+		then
+		rm -f $refs
+	fi
 	touch $refs
 	echo -e "External (MDBG, MethodObj, 1)"								>>$refs
 	echo -e "External (_GPE.MMTB, MethodObj, 0)"						>>$refs
