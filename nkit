@@ -458,8 +458,7 @@ function checkUpdate()
 					echo -e "Updating..." && sleep 0.5
 					sudo rm -f /bin/nkit
 					sudo cp -f ./nkit /bin/
-					echo -e "Please check new version by running nkit -v" && sleep 1
-					echo -e "It should say: $(cat ./sVers)"
+					verifyUpdate
 					;;
 				[nN]* )
 					echo -e "Okay. But you should update for new features."
