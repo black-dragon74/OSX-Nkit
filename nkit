@@ -124,6 +124,7 @@ function backupData()
 	echo -e "SuperVIAATA"						>>$slekextlist
 	echo -e "VoodooP"							>>$slekextlist
 	echo -e "VoodooH"							>>$slekextlist
+	echo -e "AsusNBFnKeys"						>>$slekextlist
 
 	# Tell the user about the kexts that are to be backed up.
 	echo -e "The SLE kexts that will be included in the backup are :-"
