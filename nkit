@@ -575,7 +575,7 @@ function main()
 
 #============================    READ ARGS AND START PROGRAM      =================================
 
-if [ $1 == "-v" ];
+if [[ $1 == "-v" || $1 == "version" ]];
 	then
 	main $1 $2
 else
