@@ -341,7 +341,7 @@ function restoreData()
 
 	# DSDTs and SSDTs follow
 	echo -e "Restoring DSDTs/SSDTs"
-	cp -rf $restorefolder/DSDT/* $dsdt/
+	cp -rf $restorefolder/DSDT/*.aml $dsdt/
 
 	# Clover's Drivers now
 	echo -e "Restoring Drivers."
