@@ -480,7 +480,7 @@ function verifyUpdate()
 	cd $home
 	curl -o sVers https://raw.githubusercontent.com/black-dragon74/OSX-Nkit/osx/sVers &>/dev/null
 	chmod 644 ./sVers
-	if [ $(cat ./sVers) == $scriptVersion ];
+	if [ $(cat ./sVers) == $(nkit -v) ];
 		then
 		echo -e "Update has been verified and is complete."
 		rm -f ./sVers
