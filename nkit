@@ -209,6 +209,17 @@ function backupData()
 		echo Backed Up $f* && sleep 0.5
 		cp -rf $f $dsdtbackup
 	done
+	# Add default refs.txt in-case user has to decompile DSDTs with external refs.
+	refs = $dsdtbackup/default-refs.txt
+	touch $refs
+	echo -e "External (MDBG, MethodObj, 1)"								>>$refs
+	echo -e "External (_GPE.MMTB, MethodObj, 0)"						>>$refs
+	echo -e "External (_SB_.PCI0.LPCB.H_EC.ECWT, MethodObj, 2)"			>>$refs
+	echo -e "External (_SB_.PCI0.LPCB.H_EC.ECRD, MethodObj, 1)"			>>$refs
+	echo -e "External (_SB_.PCI0.PEG0.PEGP.SGPO, MethodObj, 2)"			>>$refs
+	echo -e "External (_SB.PCI0.GFX0.DD02._BCM, MethodObj, 1)"			>>$refs
+	echo -e "External (_SB.PCI0.SAT0.SDSM, MethodObj, 4)"				>>$refs
+	echo -e "External (_GPE.VHOV, MethodObj, 3)"						>>$refs
 
 	# Configs
 	for f in $(ls $config/*.plist); do
