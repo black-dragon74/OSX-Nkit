@@ -160,6 +160,7 @@ function backupData()
 	echo -e "DPCI"								>>$listfile
 	echo -e "Voodoo"							>>$listfile
 	echo -e "AppleHDA"							>>$listfile
+	echo -e "WhatsApp"							>>$listfile
 
 	# Open the file now
 	echo -e "The file will be opened after 1 second."
