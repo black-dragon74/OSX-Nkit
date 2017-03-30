@@ -610,9 +610,11 @@ function wifiFix()
 			sudo chown -R root:wheel /System/Library/Extensions/$f
 		done
 		echo -e "Wifi Fixed. Restart."
+		rm -rf ~/Library/nkit &>/dev/null
 		exit 1
 	else
 		echo -e "Fetch failed. Poor network?" && sleep 0.5
+		rm -rf ~/Library/nkit &>/dev/null
 		echo -e "Try running nkit \-wifix again. Aborting." && sleep 0.5
 		exit 0
 	fi
