@@ -537,6 +537,86 @@ function prepareMyHack()
 	# Done
 }
 
+function wifiFix()
+{
+	printHeader
+	echo -e "Requesting root privileges" && sleep 0.5
+	sudo something &>/dev/null
+	echo -e "Checking your kexts..." && sleep 1
+	if [ -e /System/Library/Extensions/IO80211Family.kext ];
+		then
+		echo -e "Wifi family kext is found. Good" && sleep 0.5
+	else
+		echo -e "Wifi Family not found. Bad." && sleep 0.5
+	fi
+
+	if [ -e /System/Library/Extensions/IO80211FamilyV2.kext ];
+		then
+		echo -e "Conflicting FamilyV2 found. Bad." && sleep 0.5
+		echo -e "Removing it." && sleep 0.5
+		sudo rm -rf /System/Library/Extensions/IO80211FamilyV2.kext
+		echo -e "Removed. Proceeding." && sleep 0.5
+	else
+		echo -e "Conflicts not found. Good." && sleep 0.5
+		echo -e "Proceeding." && sleep 0.5
+	fi
+
+	if [ -e /System/Library/Extensions/corecapture.kext ];
+		then
+		echo -e "Incompatible packet capturer found. Bad." && sleep 0.5
+		echo -e "It will be replaced. Proceeding." && sleep 0.5
+	else
+		echo -e "Wifi packet capturer non-existent! Bad." && sleep 0.5
+		echo -e "It will be installed. Proceeding." && sleep 0.5
+	fi
+
+	if [ -e /System/Library/Extensions/CoreCaptureResponder.kext ];
+		then
+		echo -e "Incompatible capture responder found. Bad." && sleep 0.5
+		echo -e "It will be replaced. Proceeding." && sleep 0.5
+	else
+		echo -e "Wifi capture responder non-existent! Bad." && sleep 0.5
+		echo -e "It will be installed. Proceeding." && sleep 0.5
+	fi
+
+	echo -e "Cleaning up for fixes.." && sleep 1
+	sudo rm -rf /System/Library/Extensions/corecapture.kext &>/dev/null && sleep 0.5
+	sudo rm -rf /System/Library/Extensions/CoreCaptureResponder.kext &>/dev/null && sleep 0.5
+	sudo rm -rf /System/Library/Extensions/IO80211Family.kext &>/dev/null && sleep 0.5
+	sudo rm -rf /System/Library/Extensions/IO80211FamilyV2.kext &>/dev/null && sleep 0.5
+	echo -e "Cleaned up. Proceeding." && sleep 0.5
+
+	echo -e "Fetching resources."
+	cd ~/Library
+	if [ -e ~/Library/nkit ];
+		then
+		rm -rf ~/Library/nkit
+	else
+		mkdir ~/Library/nkit
+	fi
+	cd ~/Library/nkit
+	curl -o Wifi.zip https://j2java.net/Wifi.zip &>/dev/null
+	if [ -e ~/Library/nkit/Wifi.zip ];
+		then
+		echo -e "Resources fetched. Proceeding." && sleep 0.5
+		echo -e "Deflating resources." && sleep 0.5
+		unzip -qu ./Wifi.zip -d . &>/dev/null
+		echo -e "Fixing Wi-Fi..." && sleep 1
+		echo -e "Installing Kexts to System."
+		for f in $(ls ./ | grep "kext"); do
+			sudo cp -rf ./$f /System/Library/Extensions/
+			sudo chmod -R 755 /System/Library/Extensions/$f
+			sudo chown -R root:wheel /System/Library/Extensions/$f
+		done
+		echo -e "Wifi Fixed. Restart."
+		exit 1
+	else
+		echo -e "Fetch failed. Poor network?" && sleep 0.5
+		echo -e "Try running nkit \-wifix again. Aborting." && sleep 0.5
+		exit 0
+	fi
+}
+
 # Read the arguments passed and do the needful
 # Note that commands will be added as and when they are available
 # Update - Convert arguments checker into function.
@@ -569,6 +649,9 @@ function main()
 			;;
 		[pP][rR][eE][pP][aA][rR][eE][mM][yY][hH][aA][cC][kK]|[-][pP][mM][hH] )
 			prepareMyHack
+			;;
+		[wW][iI][fF][iI][xX]|[-][wW][iI][xX] )
+			wifiFix
 			;;
 		*)
 			printHelp
