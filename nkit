@@ -83,6 +83,7 @@ function printHelp()
 	echo \ \ \ \ \ \ \ nkit [update][force]\|[-up][--force] Check\/Force update of N\(k\)it.
 	echo \ \ \ \ \ \ \ nkit [version]\|[-v] Shows the version of the program.
 	echo \ \ \ \ \ \ \ nkit [preparemyhack]\|[-pmh] Download and \install base stuffs.
+	echo \ \ \ \ \ \ \ nkit [wifix]\|[-wix] Fix Atheros AR956X Wi-Fi.
 }
 
 function backupData()
