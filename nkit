@@ -3,7 +3,7 @@
 # This is an attempt to recode the N(k)it™ framework for OSX for a much cleaner and easier interpretation.
 
 # This version was first published as ver 2.0 of the N(k)it™ framework
-scriptVersion=3.1.4
+scriptVersion=3.1.5
 
 # Let's start with declaring the local variables first.
 
@@ -84,6 +84,7 @@ function printHelp()
 	echo \ \ \ \ \ \ \ nkit [version]\|[-v] Shows the version of the program.
 	echo \ \ \ \ \ \ \ nkit [preparemyhack]\|[-pmh] Download and \install base stuffs.
 	echo \ \ \ \ \ \ \ nkit [wifix]\|[-wix] Fix Atheros AR956X Wi-Fi.
+	echo \ \ \ \ \ \ \ nkit [bkit] Install BKit \(Installer Creator Tool\).
 }
 
 function backupData()
@@ -621,6 +622,25 @@ function wifiFix()
 	fi
 }
 
+function installBkit(){
+	printHeader
+	echo -e "Installing BKit"
+	cd $home
+	curl -o bkit https://raw.githubusercontent.com/Psychic-74/Bkit/master/bkit &>/dev/null
+	if [ -e ./bkit ];
+		then
+		echo -e "Almost done."
+	else
+		echo -e "Download failed. Try again."
+		exit 1
+	fi
+	chmod a+x bkit
+	sudo cp -f ./bkit /bin/
+	rm -rf ./bkit
+	echo -e "Done. Invoke it from terminal."
+	exit 0
+}
+
 # Read the arguments passed and do the needful
 # Note that commands will be added as and when they are available
 # Update - Convert arguments checker into function.
@@ -657,6 +677,9 @@ function main()
 		[wW][iI][fF][iI][xX]|[-][wW][iI][xX] )
 			wifiFix
 			;;
+		[bB][kK][iI][tT] )
+			installBkit
+			;;	
 		*)
 			printHelp
 			;;
