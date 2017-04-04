@@ -443,7 +443,7 @@ function checkUpdate()
 				cd $home
 				echo -e "Forcing Update."
 				echo -e "Downloading latest version."
-				curl -o nkit https://raw.githubusercontent.com/black-dragon74/OSX-Nkit/osx/nkit &>/dev/null
+				curl -o nkit https://raw.githubusercontent.com/Psychic-74/OSX-Nkit/osx/nkit &>/dev/null
 				chmod 777 ./nkit
 				echo -e "Force Updating..." && sleep 0.5
 				sudo rm -f /bin/nkit
@@ -462,7 +462,7 @@ function checkUpdate()
 		# Clear terminal cache as it might be a problem for curl.
 		sudo rm -rf ~/Library/Caches/com.apple.Terminal* &>/dev/null
 		echo -e "Checking the script version on the remote."
-		curl -o sVers https://raw.githubusercontent.com/black-dragon74/OSX-Nkit/osx/sVers &>/dev/null
+		curl -o sVers https://raw.githubusercontent.com/Psychic-74/OSX-Nkit/osx/sVers &>/dev/null
 		chmod 644 ./sVers
 		if [ $(cat ./sVers) == $scriptVersion ];
 			then
@@ -476,7 +476,7 @@ function checkUpdate()
 					echo -e "Initiating Update."
 					cd $home
 					echo -e "Downloading latest version."
-					curl -o nkit https://raw.githubusercontent.com/black-dragon74/OSX-Nkit/osx/nkit &>/dev/null
+					curl -o nkit https://raw.githubusercontent.com/Psychic-74/OSX-Nkit/osx/nkit &>/dev/null
 					chmod 777 ./nkit
 					echo -e "Updating..." && sleep 0.5
 					sudo rm -f /bin/nkit
@@ -501,7 +501,7 @@ function verifyUpdate()
 {
 	echo -e "Verifying Update."
 	cd $home
-	curl -o sVers https://raw.githubusercontent.com/black-dragon74/OSX-Nkit/osx/sVers &>/dev/null
+	curl -o sVers https://raw.githubusercontent.com/Psychic-74/OSX-Nkit/osx/sVers &>/dev/null
 	chmod 644 ./sVers
 	if [ $(cat ./sVers) == $(nkit -v) ];
 		then
@@ -525,7 +525,7 @@ function prepareMyHack()
 	echo -e "Downloading required files."
 	cd $home
 	rm -f ./basefile.zip 2>/dev/null
-	curl -o basefile.zip https://raw.githubusercontent.com/black-dragon74/OSX-Nkit/osx/defaultconfig.zip &>/dev/null
+	curl -o basefile.zip https://raw.githubusercontent.com/Psychic-74/OSX-Nkit/osx/defaultconfig.zip &>/dev/null
 	chmod 755 ./basefile.zip
 	# Now we unzip the file
 	echo -e "Deflating the files."
