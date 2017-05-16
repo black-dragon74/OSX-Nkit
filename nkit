@@ -118,6 +118,12 @@ function backupData()
 	rm ~/new_ss.txt
 	rm ~/new_s.txt
 
+	# Add any other kexts you'ld like to include in backup
+	echo -e "AppleHDA"				>>$slekextlist	# As AppleHDAConfigDriver is located inside AppleHDA.kext
+	echo -e "corecapture"			>>$slekextlist	# CoreCapture from El-Capitan is required in some cases.
+	echo -e "IO80211Family"			>>$slekextlist	# Patched Kexts lie inside this kext for Broadcom or Atheros.
+
+
 
 	# Tell the user about the kexts that are to be backed up.
 	echo -e "The SLE kexts that will be included in the backup are :-" && sleep 0.5
