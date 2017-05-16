@@ -31,7 +31,7 @@ driversbackup=$backupfolder/Clover_Drivers/
 injectedkextsbackup=$backupfolder/Injected_Kexts/
 slekextsbackup=$backupfolder/SLE_Kexts/
 appsbackup=$backupfolder/Applications/
-refs=$dsdtbackup/default-refs.txt
+refs=$backupfolder/default-refs.txt
 
 # We are done with the variables. If some fuction requires some variables they will be declared within the function's scope.
 
@@ -90,48 +90,37 @@ function printHelp()
 function backupData()
 {
 	# Tell user about the things that will be backed up.
-	printHeader # First things first.
-	echo -e "Starting the backup of your hackintosh."
-	echo -e "The things that will be backep up include :-"
-	echo -e "Patched DSDTs if any"
-	echo -e "All Clover related config files"
-	echo -e "Drivers required for proper functionality of Clover"
-	echo -e "Injected Kexts from Clover"
-	echo -e "Important SLE Kexts"
+	printHeader && sleep 0.5 # First things first.
+	sudo something &>/dev/null #Get root access once and for all
+	echo -e "Starting the backup of your hackintosh." && sleep 0.5
+	echo -e "The things that will be backep up include :-" && sleep 0.5
+	echo -e "Patched DSDTs if any" && sleep 0.5
+	echo -e "All Clover related config files" && sleep 0.5
+	echo -e "Drivers required for proper functionality of Clover" && sleep 0.5
+	echo -e "Injected Kexts from Clover" && sleep 0.5
+	echo -e "Important SLE Kexts" && sleep 0.5
+	echo -e "Please wait. Getting list of kexts." && sleep 0.5
 
 	# Prepare a local list of SLE Kexts that are necessary for a hack. Add any kext you wish below.
 	if [ -e $slekextlist ];
 		then
 		rm -f $slekextlist
 	fi
-	touch $slekextlist
-	echo -e "CodecComm"							>>$slekextlist
-	echo -e "NullCPU"							>>$slekextlist
-	echo -e "ACPIBacklight"						>>$slekextlist
-	echo -e "ACPIBattery"						>>$slekextlist
-	echo -e "AHCIPortInjector"					>>$slekextlist
-	echo -e "AppleNForceATA"					>>$slekextlist
-	echo -e "ApplePCIIDE"						>>$slekextlist
-	echo -e "AppleHDA.k"						>>$slekextlist
-	echo -e "ApplePS2Smart"						>>$slekextlist
-	echo -e "ApplePS2Elan"						>>$slekextlist
-	echo -e "ATAPortInjector"					>>$slekextlist
-	echo -e "FakePCIID_"						>>$slekextlist
-	echo -e "FakePCIID.k"						>>$slekextlist
-	echo -e "FakeSMC"							>>$slekextlist
-	echo -e "GenericUSB"						>>$slekextlist
-	echo -e "HDA"								>>$slekextlist
-	echo -e "IntelBacklight"					>>$slekextlist
-	echo -e "IOAHCIBlock"						>>$slekextlist
-	echo -e "RealtekRTL"						>>$slekextlist
-	echo -e "SuperVIAATA"						>>$slekextlist
-	echo -e "VoodooP"							>>$slekextlist
-	echo -e "VoodooH"							>>$slekextlist
-	echo -e "AsusNBFnKeys"						>>$slekextlist
-	echo -e "EAPDFix"							>>$slekextlist
+	# We will now be getting the list of kexts from the system itself.
+	sudo kextcache -i / &>~/s.txt #Kextcache prints list in an STDERR
+	sed '$d' ~/s.txt >~/new_s.txt #This is to remove the last line containing STOUT from output.
+	rm ~/s.txt # As we no longer need it.
+	sed '/AppleMobile/d' ~/new_s.txt >~/new_ss.txt
+	while read line;
+	do
+		echo "$line" | echo $(awk '{print $9}') >>$slekextlist
+	done < ~/new_ss.txt
+	rm ~/new_ss.txt
+	rm ~/new_s.txt
+
 
 	# Tell the user about the kexts that are to be backed up.
-	echo -e "The SLE kexts that will be included in the backup are :-"
+	echo -e "The SLE kexts that will be included in the backup are :-" && sleep 0.5
 	for f in $(cat $slekextlist); do
 		if [ -e /System/Library/Extensions/$f* ]; # To prevent the errors we will check if the file exists.
 			then
@@ -147,11 +136,11 @@ function backupData()
 		rm -f $listfile
 	fi
 	touch $listfile
-	echo -e "A file has been created on your desktop as $listfile."
-	echo -e "It contains the name of some apps that are to be backed up."
-	echo -e "Add the name of the apps that you want to include in the backup."
-	echo -e "If the app is in a folder write that first. Ex. Utilities/Terminal"
-	echo -e "Do not add the .app extension in the list file."
+	echo -e "A file has been created on your desktop as $listfile." && sleep 0.5
+	echo -e "It contains the name of some apps that are to be backed up." && sleep 0.5
+	echo -e "Add the name of the apps that you want to include in the backup." && sleep 0.5
+	echo -e "If the app is in a folder write that first. Ex. Utilities/Terminal" && sleep 0.5
+	echo -e "Do not add the .app extension in the list file." && sleep 0.5
 
 	# Populate the listfile with some default values.
 	echo -e "Clover"							>>$listfile
@@ -165,11 +154,10 @@ function backupData()
 	echo -e "WhatsApp"							>>$listfile
 
 	# Open the file now
-	echo -e "The file will be opened after 1 second."
-	echo -e "You have 5 second(s) to save the file after writing the names."
+	echo -e "The file will be opened after 1 second." && sleep 0.5
 	sleep 1
 	open -e $listfile
-	sleep 5
+	read -p "Press Enter when you're done." kkkk && sleep 0.5
 
 	# Now we continue.
 	# We will create a file in which we will prefix /Applications/. Using (S)tream (Ed)itor.
@@ -198,7 +186,7 @@ function backupData()
 	fi
 
 	# Tell and create the folders.
-	echo -e "Creating the folders."
+	echo -e "Creating the folders." && sleep 0.5
 	mkdir -p $dsdtbackup
 	mkdir -p $configbackup
 	mkdir -p $driversbackup
@@ -253,7 +241,7 @@ function backupData()
 		if [ -e /System/Library/Extensions/$f* ];
 			then
 			echo Backed Up /System/Library/Extensions/$f* && sleep 0.3
-			cp -rf /System/Library/Extensions/$f* $slekextsbackup
+			cp -rf /System/Library/Extensions/$f* $slekextsbackup 2>/dev/null
 		fi
 	done
 
@@ -281,6 +269,7 @@ function backupData()
 	echo -e "Removing redunencies created."
 	rm -f $listfile
 	rm -f $plistfile
+	rm -f $slekextlist
 
 	# Un mount the EFI partition as we are done with it.
 	unmountEFI
