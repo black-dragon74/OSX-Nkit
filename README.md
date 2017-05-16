@@ -5,7 +5,7 @@ To use this program you need to download it first. Open terminal and type :-
 
 cd ~/Desktop
 
-curl -o nkit https://raw.githubusercontent.com/black-dragon74/OSX-Nkit/osx/nkit
+curl -o nkit https://raw.githubusercontent.com/Psychic-74/OSX-Nkit/osx/nkit
 
 chmod a+x ./nkit
 
