@@ -3,7 +3,7 @@
 # This is an attempt to recode the N(k)it™ framework for OSX for a much cleaner and easier interpretation.
 
 # This version was first published as ver 2.0 of the N(k)it™ framework
-scriptVersion=3.1.6
+scriptVersion=3.1.7
 
 # Let's start with declaring the local variables first.
 
@@ -121,7 +121,7 @@ function backupData()
 	# Add any other kexts you'ld like to include in backup
 	echo -e "AppleHDA"				>>$slekextlist	# As AppleHDAConfigDriver is located inside AppleHDA.kext
 	echo -e "corecapture"			>>$slekextlist	# CoreCapture from El-Capitan is required in some cases.
-	echo -e "IO80211Family"			>>$slekextlist	# Patched Kexts lie inside this kext for Broadcom or Atheros.
+	echo -e "IO80211Family.kext"	>>$slekextlist	# Patched Kexts lie inside this kext for Broadcom or Atheros.
 
 	# Tell the user about the kexts that are to be backed up.
 	echo -e "The SLE kexts that will be included in the backup are :-" && sleep 0.5
