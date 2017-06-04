@@ -121,8 +121,7 @@ function backupData()
 	# Add any other kexts you'ld like to include in backup
 	echo -e "AppleHDA"				>>$slekextlist	# As AppleHDAConfigDriver is located inside AppleHDA.kext
 	echo -e "corecapture"			>>$slekextlist	# CoreCapture from El-Capitan is required in some cases.
-	echo -e "IO80211Family.kext"	>>$slekextlist	# Patched Kexts lie inside this kext for Broadcom or Atheros.
-
+	
 	# Tell the user about the kexts that are to be backed up.
 	echo -e "The SLE kexts that will be included in the backup are :-" && sleep 0.5
 	for f in $(cat $slekextlist); do
@@ -250,6 +249,8 @@ function backupData()
 			cp -rf /System/Library/Extensions/$f* $slekextsbackup 2>/dev/null
 		fi
 	done
+	cp -rf /System/Library/Extensions/IO80211Family.kext &>/dev/null && echo Backed Up /System/Library/Extensions/IO80211Family.kext && sleep 0.3
+	cp -rf /Library/Extensions/AppleBacklightInjector.kext &>/dev/null && echo Backed Up /Library/Extensions/AppleBacklightInjector.kext && sleep 0.3
 
 	# Applications
 	for f in $(cat $plistfile); do
