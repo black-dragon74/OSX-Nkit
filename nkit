@@ -93,7 +93,7 @@ function backupData()
 	printHeader && sleep 0.5 # First things first.
 	sudo something &>/dev/null #Get root access once and for all
 	echo -e "Starting the backup of your hackintosh." && sleep 0.5
-	echo -e "The things that will be backep up include :-" && sleep 0.5
+	echo -e "The things that will be backed up include :-" && sleep 0.5
 	echo -e "Patched DSDTs if any" && sleep 0.5
 	echo -e "All Clover related config files" && sleep 0.5
 	echo -e "Drivers required for proper functionality of Clover" && sleep 0.5
