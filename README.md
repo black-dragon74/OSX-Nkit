@@ -3,17 +3,11 @@ An AIO toolkit for most of the Hackintosh needs.
 
 To use this program you need to download it first. Open terminal and type :-
 
-cd ~/Desktop
+sudo curl -o /usr/bin/nkit https://raw.githubusercontent.com/Psychic-74/OSX-Nkit/osx/nkit && sudo chmod a+x /usr/bin/nkit
 
-curl -o nkit https://raw.githubusercontent.com/Psychic-74/OSX-Nkit/osx/nkit
+You can verify by typing "which nkit" (Without Quotes).
 
-chmod a+x ./nkit
-
-Now you can use the program by passing ./nkit argument or you can copy it to /usr/loca/bin for easier access.
-
-You can verify after copying by typing "which nkit" (Without Quotes).
-
-Output should say "/usr/local/bin/nkit".
+Output should say "/usr/bin/nkit".
 
 Please use nkit help or nkit -h for the details of the program's functions.
 
