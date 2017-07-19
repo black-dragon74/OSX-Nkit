@@ -594,7 +594,7 @@ function wifiFix()
 		mkdir -p ~/Library/nkit
 	fi
 	cd ~/Library/nkit
-	curl -o Wifi.zip https://raw.githubusercontent.com/Psychic-74/OSX-Nkit/osx/defaultconfig.zip &>/dev/null
+	curl -o Wifi.zip https://raw.githubusercontent.com/Psychic-74/OSX-Nkit/osx/Wifi.zip &>/dev/null
 	if [ -e ~/Library/nkit/Wifi.zip ];
 		then
 		echo -e "Resources fetched. Proceeding." && sleep 0.5
