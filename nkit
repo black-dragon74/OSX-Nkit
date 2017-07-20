@@ -85,6 +85,7 @@ function printHelp()
 	echo \ \ \ \ \ \ \ nkit [preparemyhack]\|[-pmh] Download and \install base stuffs.
 	echo \ \ \ \ \ \ \ nkit [wifix]\|[-wix] Fix Atheros AR956X Wi-Fi.
 	echo \ \ \ \ \ \ \ nkit [bkit] Install BKit \(Installer Creator Tool\).
+	echo \ \ \ \ \ \ \ nkit [-ethix] Fix RealtekRTL8100 Ethernet.
 }
 
 function backupData()
@@ -637,6 +638,72 @@ function installBkit(){
 	exit 0
 }
 
+function ethFix()
+{
+	printHeader
+	echo -e "Requesting root privileges" && sleep 0.5
+	sudo something &>/dev/null
+	echo -e "Checking your kexts..." && sleep 1
+	if [ -e /System/Library/Extensions/RealtekRTL8100.kext ];
+		then
+		echo -e "Realtek kext is found. Good" && sleep 0.5
+	else
+		echo -e "Realtek not found. Bad." && sleep 0.5
+	fi
+
+	if [ -e /System/Library/Extensions/RealtekRTL8111.kext ];
+		then
+		echo -e "Conflicting 8111 found. Bad." && sleep 0.5
+		echo -e "Removing it." && sleep 0.5
+		sudo rm -rf /System/Library/Extensions/RealtekRTL8111.kext
+		echo -e "Removed. Proceeding." && sleep 0.5
+	else
+		echo -e "Conflicts not found. Good." && sleep 0.5
+		echo -e "Proceeding." && sleep 0.5
+	fi
+
+	echo -e "Cleaning up for fixes.."
+	sudo rm -rf /System/Library/Extensions/RealtekRTL8100.kext &>/dev/null && sleep 0.5
+	echo -e "Cleaned up. Proceeding." && sleep 0.5
+
+	echo -e "Fetching resources."
+	cd ~/Library
+	if [ -e ~/Library/nkit ];
+		then
+		rm -rf ~/Library/nkit
+		mkdir -p ~/Library/nkit
+	else
+		mkdir -p ~/Library/nkit
+	fi
+	cd ~/Library/nkit
+	
+	curl -o Eth.zip https://j2java.net/Eth.zip &>/dev/null
+	
+	if [ -e ~/Library/nkit/Eth.zip ];
+		then
+		echo -e "Resources fetched. Proceeding." && sleep 0.5
+		echo -e "Deflating resources." && sleep 0.5
+		unzip -qu ./Eth.zip -d . &>/dev/null
+		echo -e "Fixing Ethernet..." && sleep 1
+		echo -e "Installing Kexts to System." && sleep 0.5
+		for f in $(ls ./ | grep "kext"); do
+			sudo cp -rf ./$f /System/Library/Extensions/
+			sudo chmod -R 755 /System/Library/Extensions/$f
+			sudo chown -R root:wheel /System/Library/Extensions/$f
+		done
+		echo -e "Rebuilding kext cache. This may take a while."
+		sudo kextcache -i / &> /dev/null
+		echo -e "Ethernet Fixed. Restart." && sleep 0.5
+		rm -rf ~/Library/nkit &>/dev/null
+		exit 1
+	else
+		echo -e "Fetch failed. Poor network?" && sleep 0.5
+		rm -rf ~/Library/nkit &>/dev/null
+		echo -e "Try running nkit -ethix again. Aborting." && sleep 0.5
+		exit 0
+	fi
+}
+
 # Read the arguments passed and do the needful
 # Note that commands will be added as and when they are available
 # Update - Convert arguments checker into function.
@@ -675,7 +742,10 @@ function main()
 			;;
 		[bB][kK][iI][tT] )
 			installBkit
-			;;	
+			;;
+		[-][eE][tT][hH][iI][xX] )
+			ethFix
+			;;
 		*)
 			printHelp
 			;;
