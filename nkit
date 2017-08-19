@@ -3,7 +3,7 @@
 # This is an attempt to recode the N(k)it™ framework for OSX for a much cleaner and easier interpretation.
 
 # This version was first published as ver 2.0 of the N(k)it™ framework
-scriptVersion=3.1.9
+scriptVersion=3.2
 
 # Let's start with declaring the local variables first.
 
@@ -32,7 +32,8 @@ injectedkextsbackup=$backupfolder/Injected_Kexts/
 slekextsbackup=$backupfolder/SLE_Kexts/
 appsbackup=$backupfolder/Applications/
 refs=$backupfolder/default-refs.txt
-
+testURL="google.com"
+isGreater="no"
 # We are done with the variables. If some fuction requires some variables they will be declared within the function's scope.
 
 # Now we will declare the functions as i prefer writing a piece of code once instead of writing the same code over and over again.
@@ -535,53 +536,68 @@ function prepareMyHack()
 	# Done
 }
 
+# New function to check if SW is greater than EL CAPITAN
+function checkElcap(){
+	# Get OS version
+	x=$(sw_vers -productVersion)
+
+	# Remove last 2 chars
+	x=$(echo ${x%%??})
+
+	# Remove dots (.)
+	x=$(echo $x | sed 's/\.//g')
+
+	# Compare the sw vers to that of el capitan
+	if [ $x -gt 1011 ];
+		then
+		isGreater="yes"
+	else
+		isGreater="no"
+	fi
+}
+
 function wifiFix()
 {
+	# Note: Only AirportAtheros40.kext is needed for this new style of patch to be in effect.
+	#		I080211Family.kext IO80211Familyv2.kext corecapture.kext are untouched,
+	#		Extracted from macOS sierra 10.12.6
+	#		This program replaces the above 3 kexts anyways to resolve conflicts from previous patches.
+	#		CoreCaptureResponder is not needed on 10.12+
+
 	printHeader
 	echo -e "Requesting root privileges" && sleep 0.5
 	sudo something &>/dev/null
 	echo -e "Checking your kexts..." && sleep 1
-	if [ -e /System/Library/Extensions/IO80211Family.kext ];
+
+	# As said earlier, CoreCaptureResponder is not needed on 10.11+
+	# Let's check and do the needful
+	checkElcap
+
+	# Cut the output
+	if [[ $isGreater == "yes" ]];
 		then
-		echo -e "Wifi family kext is found. Good" && sleep 0.5
+		echo -e "Software detected: 10.11+ " && sleep 0.5
+		echo -e "CoreCaptureResponder will be removed." && sleep 0.5
+		# Remove it
+		sudo rm -rf /System/Library/Extensions/CoreCaptureResponder.kext &>/dev/null && sleep 0.5
 	else
-		echo -e "Wifi Family not found. Bad." && sleep 0.5
+		echo -e "Software detected: 10.11-" && sleep 0.5
+		echo -e "CoreCaptureResponder will not be removed." && sleep 0.5
 	fi
 
-	if [ -e /System/Library/Extensions/IO80211FamilyV2.kext ];
+	# It is important to check internet connectivity first.
+	if ping -c 1 $testURL &>/dev/null;
 		then
-		echo -e "Conflicting FamilyV2 found. Bad." && sleep 0.5
-		echo -e "Removing it." && sleep 0.5
-		sudo rm -rf /System/Library/Extensions/IO80211FamilyV2.kext
-		echo -e "Removed. Proceeding." && sleep 0.5
+		echo -e "Good. You're online. Let's do it." && sleep 0.5
 	else
-		echo -e "Conflicts not found. Good." && sleep 0.5
-		echo -e "Proceeding." && sleep 0.5
-	fi
-
-	if [ -e /System/Library/Extensions/corecapture.kext ];
-		then
-		echo -e "Incompatible packet capturer found. Bad." && sleep 0.5
-		echo -e "It will be replaced. Proceeding." && sleep 0.5
-	else
-		echo -e "Wifi packet capturer non-existent! Bad." && sleep 0.5
-		echo -e "It will be installed. Proceeding." && sleep 0.5
-	fi
-
-	if [ -e /System/Library/Extensions/CoreCaptureResponder.kext ];
-		then
-		echo -e "Incompatible capture responder found. Bad." && sleep 0.5
-		echo -e "It will be replaced. Proceeding." && sleep 0.5
-	else
-		echo -e "Wifi capture responder non-existent! Bad." && sleep 0.5
-		echo -e "It will be installed. Proceeding." && sleep 0.5
+		echo -e "Sorry but to prevent any unexpected results, aborting." && sleep 0.5
 	fi
 
 	echo -e "Cleaning up for fixes.." && sleep 1
 	sudo rm -rf /System/Library/Extensions/corecapture.kext &>/dev/null && sleep 0.5
-	sudo rm -rf /System/Library/Extensions/CoreCaptureResponder.kext &>/dev/null && sleep 0.5
 	sudo rm -rf /System/Library/Extensions/IO80211Family.kext &>/dev/null && sleep 0.5
 	sudo rm -rf /System/Library/Extensions/IO80211FamilyV2.kext &>/dev/null && sleep 0.5
+	sudo rm -rf /System/Library/Extensions/AirPortAtheros40.kext &>/dev/null && sleep 0.5
 	echo -e "Cleaned up. Proceeding." && sleep 0.5
 
 	echo -e "Fetching resources."
@@ -607,6 +623,11 @@ function wifiFix()
 			sudo chmod -R 755 /System/Library/Extensions/$f
 			sudo chown -R root:wheel /System/Library/Extensions/$f
 		done
+
+		# Also, it is important to rebuild kernel caches for new patch to be active
+		echo -e "Rebuilding caches..." && sleep 0.5
+		sudo kextcache -i / &>/dev/null
+
 		echo -e "Wifi Fixed. Restart." && sleep 0.5
 		rm -rf ~/Library/nkit &>/dev/null
 		exit 1
