@@ -3,7 +3,7 @@
 # This is an attempt to recode the N(k)it™ framework for OSX for a much cleaner and easier interpretation.
 
 # This version was first published as ver 2.0 of the N(k)it™ framework
-scriptVersion=3.2
+scriptVersion=3.2.1
 
 # Let's start with declaring the local variables first.
 
@@ -639,6 +639,53 @@ function wifiFix()
 	fi
 }
 
+function BTFix(){
+	printHeader
+	echo -e "Requesting root privileges..." && sleep 0.5
+	sudo ss &>/dev/null
+	echo -e "Cleaning up for fixes.." && sleep 1
+	sudo rm -rf /System/Library/Extensions/BTFirmwareUploader.kext &>/dev/null && sleep 0.5
+	echo -e "Cleaned up. Proceeding." && sleep 0.5
+
+	echo -e "Fetching resources."
+	cd ~/Library
+	if [ -e ~/Library/nkit ];
+		then
+		rm -rf ~/Library/nkit
+		mkdir -p ~/Library/nkit
+	else
+		mkdir -p ~/Library/nkit
+	fi
+	cd ~/Library/nkit
+	curl -o BT.zip https://raw.githubusercontent.com/Psychic-74/OSX-Nkit/osx/BT.zip &>/dev/null
+	if [ -e ~/Library/nkit/BT.zip ];
+		then
+		echo -e "Resources fetched. Proceeding." && sleep 0.5
+		echo -e "Deflating resources." && sleep 0.5
+		unzip -qu ./BT.zip -d . &>/dev/null
+		echo -e "Fixing Bluetooth..." && sleep 1
+		echo -e "Installing Kexts to System." && sleep 0.5
+		for f in $(ls ./ | grep "kext"); do
+			sudo cp -rf ./$f /System/Library/Extensions/
+			sudo chmod -R 755 /System/Library/Extensions/$f
+			sudo chown -R root:wheel /System/Library/Extensions/$f
+		done
+
+		# Also, it is important to rebuild kernel caches for new patch to be active
+		echo -e "Rebuilding caches..." && sleep 0.5
+		sudo kextcache -i / &>/dev/null
+
+		echo -e "Bluetooth Fixed. Restart." && sleep 0.5
+		rm -rf ~/Library/nkit &>/dev/null
+		exit 1
+	else
+		echo -e "Fetch failed. Poor network?" && sleep 0.5
+		rm -rf ~/Library/nkit &>/dev/null
+		echo -e "Try running nkit -bix again. Aborting." && sleep 0.5
+		exit 0
+	fi
+}
+
 function installBkit(){
 	printHeader
 	echo -e "Installing BKit"
@@ -696,6 +743,9 @@ function main()
 			;;
 		[bB][kK][iI][tT] )
 			installBkit
+			;;
+		[bB][tT][fF][iI][xX]|[-][bB][iI][xX] )
+			BTFix
 			;;	
 		*)
 			printHelp
