@@ -85,7 +85,7 @@ function printHelp()
 	echo \ \ \ \ \ \ \ nkit [version]\|[-v] Shows the version of the program.
 	echo \ \ \ \ \ \ \ nkit [preparemyhack]\|[-pmh] Download and \install base stuffs.
 	echo \ \ \ \ \ \ \ nkit [wifix]\|[-wix] Fix Atheros AR956X Wi-Fi.
-	echo \ \ \ \ \ \ \ nkit [btfix]\|[-bix] Fix Atheros AR956X Wi-Fi.
+	echo \ \ \ \ \ \ \ nkit [btfix]\|[-bix] Fix Atheros AR956X Bluetooth.
 	echo \ \ \ \ \ \ \ nkit [bkit] Install BKit \(Installer Creator Tool\).
 }
 
