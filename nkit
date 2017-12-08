@@ -3,7 +3,7 @@
 # This is an attempt to recode the N(k)it™ framework for OSX for a much cleaner and easier interpretation.
 
 # This version was first published as ver 2.0 of the N(k)it™ framework
-scriptVersion=3.2.2
+scriptVersion=3.2.3
 
 # Let's start with declaring the local variables first.
 
@@ -87,6 +87,7 @@ function printHelp()
 	echo \ \ \ \ \ \ \ nkit [wifix]\|[-wix] Fix Atheros AR956X Wi-Fi.
 	echo \ \ \ \ \ \ \ nkit [btfix]\|[-bix] Fix Atheros AR956X Bluetooth.
 	echo \ \ \ \ \ \ \ nkit [bkit] Install BKit \(Installer Creator Tool\).
+	echo \ \ \ \ \ \ \ nkit [-rc] Fix permissions and rebuild caches.
 }
 
 function backupData()
@@ -707,6 +708,20 @@ function installBkit(){
 	exit 0
 }
 
+function rebuildCaches(){
+	printHeader
+	echo -e "Requesting superuser access...."
+	sudo something &>/dev/null
+	echo -e "Fixing permissions and rebuilding caches......"
+	sudo chmod -Rf 755 /L*/E*
+	sudo chown -Rf root:wheel /L*/E*
+	sudo chmod -Rf 755 /S*/L*/E*
+	sudo chown -Rf root:wheel /S*/L*/E*
+	sudo kextcache -i / &>/dev/null
+	echo -e "Done.."
+	exit
+}
+
 # Read the arguments passed and do the needful
 # Note that commands will be added as and when they are available
 # Update - Convert arguments checker into function.
@@ -748,7 +763,10 @@ function main()
 			;;
 		[bB][tT][fF][iI][xX]|[-][bB][iI][xX] )
 			BTFix
-			;;	
+			;;
+		[-][rR][cC] )
+			rebuildCaches
+			;;			
 		*)
 			printHelp
 			;;
